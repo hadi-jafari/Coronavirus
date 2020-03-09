@@ -34,9 +34,7 @@ death_color <- "red"
 #------------------ Data ------------------
 
 
-#Since data of coronavirus package is not up to date:
-download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
-load("cv")
+
 
 coronavirus <- coronavirus %>% 
   ungroup() %>%
