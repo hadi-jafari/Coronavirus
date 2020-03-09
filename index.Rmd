@@ -8,6 +8,7 @@ output:
     vertical_layout: fill
 ---
 
+
 ```{r setup, include=FALSE}
 
 rm(list=ls(all.names=TRUE))

@@ -1,2 +1,0 @@
-# coronavirus
-Coronavirus Dashboard
