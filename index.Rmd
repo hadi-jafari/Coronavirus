@@ -538,7 +538,7 @@ Row
 Map
 =======================================================================
 
-### Coronavirus Confirmed Cases Worldwide {text.align=center}
+<center>Coronavirus Confirmed Cases Worldwide</center>
 
 ```{r}
 
