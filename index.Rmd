@@ -34,8 +34,8 @@ death_color <- "red"
 
 
 #Since data of coronavirus package is not up to date:
-#download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
-#load("cv")
+download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
+load("cv")
 
 coronavirus <- coronavirus %>% 
   ungroup() %>%
@@ -538,6 +538,8 @@ Row
 Map
 =======================================================================
 
+### Coronavirus Confirmed Cases Worldwide {text-align=center}
+
 ```{r}
 
 # light grey boundaries
@@ -553,13 +555,15 @@ g <- list(
 df %>%
   plot_geo(z = ~ log(confirmed), 
            color = ~ confirmed, 
-           colors = 'Blues',
-           text = ~ confirmed, 
+           colors = 'Purples',
+           text = ~ paste(country, ' >> ', confirmed), 
+           hoverinfo = 'text',
            locations = ~ country , 
-           locationmode = 'country names' ,
+           locationmode = 'country names',
            marker = list(line = l)) %>%
 
-  colorbar(title = 'Confirmed Cases', tickprefix = '') %>%
+  #colorbar(title = 'Confirmed Cases', tickprefix = '') %>%
+  hide_colorbar() %>% 
   layout(geo = g)
          #title = '2014 Global GDP<br>Source:<a href="https://www.cia.gov/library/publications/the-world-factbook/fields/2195.html">CIA World Factbook</a>'
 
@@ -676,7 +680,7 @@ df1 %>%
 
 
 
-### Population {data-width=1}
+### Population {data-width=2}
 ```{r}
 
 as.data.frame(cbind(c('China','Iran','Italy','South Korea'),
@@ -694,27 +698,49 @@ as.data.frame(cbind(c('China','Iran','Italy','South Korea'),
 ### Cumulative Confirmed Cases - Top 3 Countries Excluding China {data-width=4}
 ```{r}
 
-top <- df %>%
-  filter(country!='China') %>%
-  arrange(-confirmed) %>%
-  top_n(3, wt=confirmed) %>%
-  select(country)
+#top <- df %>%
+#  filter(country!='China') %>%
+#  arrange(-confirmed) %>%
+#  top_n(3, wt=confirmed) %>%
+#  select(country)
 
 df1 %>%
   ungroup() %>%
-  filter(country %in% unlist(top)) %>%
+  #filter(country %in% unlist(top)) %>%
+  filter(country %in% c('Iran', 'Italy', 'South Korea')) %>%
   select(country, date, confirmed) %>%
   arrange(country, date) %>%
   mutate(confirmed_cum = ave(confirmed, country, FUN=cumsum)) %>%
+  select(country, date, confirmed_cum) %>%
+  pivot_wider(names_from = country,
+              values_from = confirmed_cum,
+              values_fill=list(confirmed_cum=0)) %>%
+  arrange(date) %>%
 
 
   plot_ly(x = ~ date,
-          y = ~ confirmed_cum,
+          y = ~ Iran,
           type = "scatter",
           mode = "lines+markers",
-          name = "Cumulative Confirmed Cases",
-          line = list(color = confirmed_color),
-          marker = list(color = confirmed_color)) %>%
+          name = "Iran",
+          line = list(color = 'green'),
+          marker = list(color = 'green')) %>%
+  
+  add_trace(x = ~ date, 
+            y = ~ Italy, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "Italy",
+            line = list(color = 'blue'),
+            marker = list(color = 'blue')) %>% 
+  
+  add_trace(x = ~ date, 
+            y = ~ `South Korea`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "South Korea",
+            line = list(color = 'red'),
+            marker = list(color = 'red')) %>% 
 
   layout(title = "",
          yaxis = list(title = "Cumulative Confirmed Cases"),
