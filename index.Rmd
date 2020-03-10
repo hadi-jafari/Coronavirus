@@ -128,7 +128,7 @@ min_date <- coronavirus %>%
 
 ```
 
-WORLD
+WORLD {color=red}
 =======================================================================
 
 Row
@@ -632,7 +632,7 @@ valueBox(value = paste(format(sum(df_iran$death), big.mark = ",")
 -----------------------------------------------------------------------
 
 
-### Daily Cumulative Cases in Iran
+### Daily Cumulative Cases in Iran {data-width=4}
   
 ```{r}
 
@@ -676,10 +676,57 @@ df1 %>%
 
 
 
-### 123
+### Population {data-width=1}
 ```{r}
 
+as.data.frame(cbind(c('China','Iran','Italy','South Korea'),
+                    c('1300','80','60','50'))) %>%
+  DT::datatable(class='compact',
+            colnames = c('Country', 'Population in Millions'),
+            options = list(sDom = '<"top"><"bottom">'))
+
+
+
 ```
+
+
+
+### Cumulative Confirmed Cases - Top 3 Countries Excluding China {data-width=4}
+```{r}
+
+top <- df %>%
+  filter(country!='China') %>%
+  arrange(-confirmed) %>%
+  top_n(3, wt=confirmed) %>%
+  select(country)
+
+df1 %>%
+  ungroup() %>%
+  filter(country %in% unlist(top)) %>%
+  select(country, date, confirmed) %>%
+  arrange(country, date) %>%
+  mutate(confirmed_cum = ave(confirmed, country, FUN=cumsum)) %>%
+
+
+  plot_ly(x = ~ date,
+          y = ~ confirmed_cum,
+          type = "scatter",
+          mode = "lines+markers",
+          name = "Cumulative Confirmed Cases",
+          line = list(color = confirmed_color),
+          marker = list(color = confirmed_color)) %>%
+
+  layout(title = "",
+         yaxis = list(title = "Cumulative Confirmed Cases"),
+         xaxis = list(title = ""),
+         legend = list(x = 0.1, y = 0.9),
+         hovermode = "compare")
+
+
+
+
+```
+
 
 
 
