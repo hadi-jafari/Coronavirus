@@ -1,5 +1,5 @@
 ---
-title: "Coronavirus"
+title: "covid19"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -120,13 +120,11 @@ max_date <- coronavirus %>%
 
 
 min_date <- coronavirus %>%
-  group_by(Country.Region) %>%
+  ungroup() %>%
+  filter(type=='confirmed', cases>0) %>%
+  group_by(country) %>%
   summarise(min_date = min(date)) %>%
   arrange(min_date)
-
-
-
-
 
 
 
@@ -464,30 +462,31 @@ df %>%
 ```   
 
 
-### Number of Countries with at Least 1 Active Case at the Time
+### Number of Countries with Confirmed Cases
   
 ```{r}
 
-df1 %>%
-  ungroup() %>%
-  select(date, country, active) %>%
-  arrange(country, date) %>%
-  mutate(activ_cum=ave(active, country, FUN=cumsum)) %>%
-  filter(activ_cum>0) %>%
-  select(date, country) %>%
-  mutate(duplicate = duplicated(.)) %>%
-  filter(duplicate==F) %>%
-  group_by(date) %>%
-  summarise(No.Countries =  n()) %>%
-  arrange(date) %>%
-  
-  
+cal = seq(from = min(coronavirus$date),
+          by = "day",
+          length.out = as.numeric(max(coronavirus$date) -min(coronavirus$date))+1)
+
+a = data.frame(date=cal, No.Countries=rep(NA,length(cal)))
+
+for (val in cal ) {
+  a[a$date==val,]$No.Countries = sum(min_date$min_date<=val)
+  }
+
+
+a %>%
   plot_ly(x = ~ date, 
           y = ~ No.Countries, 
           type = "scatter", 
           mode = "lines+markers",
-          name = "No.Countries") %>% 
-  layout(yaxis = list(title = 'Number of Countires'),
+          name = "No.Countries",
+          line = list(color = confirmed_color),
+          marker = list(color = confirmed_color)) %>% 
+  layout(xaxis = list(title = ''),
+         yaxis = list(title = 'Number of Countires'),
          hovermode = "compare")
 
   
@@ -502,21 +501,38 @@ Today
 Row
 -----------------------------------------------------------------------
 
-### New Confirmed Cases on `r  max(coronavirus$date)` - Top 15 Countries
+### Cases Status Update for `r  max(coronavirus$date)`
   
 ```{r}
-df1 %>% 
-  filter(date==max(coronavirus$date)) %>% 
+
+
+
+  max_date %>%  
+  DT::datatable(rownames = FALSE,
+                colnames = c("Country", "Confirmed", "Recovered", "Death"),
+                options = list(pageLength = 10, dom = 'tip', searchHighlight = TRUE),
+                filter = 'top')
+  
+
+```
+
+
+
+### New Confirmed Cases on `r  max(coronavirus$date)` - Top 15 Countries
+```{r}
+
+max_date %>%
   ungroup() %>%
-  select(country, confirmed) %>% 
-  arrange(-confirmed) %>% 
+  arrange(-confirmed) %>%
+  filter(confirmed > 0) %>%
   top_n(n = 15, wt = confirmed) %>%
   
   plot_ly(x = ~ country,
           y = ~ confirmed,
           text = ~ confirmed,
           textposition = 'auto',
-          type = "bar") %>%
+          type = "bar",
+          marker = list(color = confirmed_color)) %>%
   layout(yaxis = list(title = ""), #paste("Confirmed Cases on ", max(coronavirus$date))),
          xaxis = list(title = "",
                       categoryorder = "array", categoryarray = ~confirmed),
@@ -528,24 +544,7 @@ df1 %>%
          pad = 2
          ))
 
-
-```
-
-
-### Cases Status Update for `r  max(coronavirus$date)`
-
-```{r}
-df1 %>% 
-  ungroup() %>%
-  filter(date==max(date)) %>%
-  select(country, confirmed, recovered, death) %>%
-  arrange(-confirmed) %>%
   
-  DT::datatable(rownames = FALSE,
-                colnames = c("Country", "Confirmed", "Recovered", "Death"),
-                options = list(pageLength = 10, dom = 'tip'),
-                )
-
 ```
 
 
@@ -553,19 +552,63 @@ df1 %>%
 Row
 -----------------------------------------------------------------------
 
-### 222
-
+### New Recovered Cases on `r  max(coronavirus$date)` - Top 15 Countries
 ```{r}
+
+max_date %>%
+  ungroup() %>%
+  arrange(-recovered) %>%
+  filter(recovered > 0) %>%
+  top_n(n = 15, wt = recovered) %>%
+  
+  plot_ly(x = ~ country,
+          y = ~ recovered,
+          text = ~ recovered,
+          textposition = 'auto',
+          type = "bar",
+          marker = list(color = recovered_color)) %>%
+  layout(yaxis = list(title = ""),
+         xaxis = list(title = "",
+                      categoryorder = "array", categoryarray = ~recovered),
+         margin =  list(
+         l = 10,
+         r = 10,
+         b = 10,
+         t = 10,
+         pad = 2
+         ))
+
 
 ```
 
-
-### 333
-
+### New Death Cases on `r  max(coronavirus$date)` - Top 15 Countries
 ```{r}
 
-```
+max_date %>%
+  ungroup() %>%
+  arrange(-death) %>%
+  filter(death > 0) %>%
+  top_n(n = 15, wt = death) %>%
+  
+  plot_ly(x = ~ country,
+          y = ~ death,
+          text = ~ death,
+          textposition = 'auto',
+          type = "bar",
+          marker = list(color = death_color)) %>%
+  layout(yaxis = list(title = ""),
+         xaxis = list(title = "",
+                      categoryorder = "array", categoryarray = ~death),
+         margin =  list(
+         l = 10,
+         r = 10,
+         b = 10,
+         t = 10,
+         pad = 2
+         ))
 
+
+```
 
 
 
@@ -620,7 +663,7 @@ Row
 ```{r}
 
 valueBox(value = paste(format(sum(df_iran$confirmed), big.mark = ","), "", sep = " "), 
-         caption = "Total Confirmed Cases", 
+         caption = 'Mobtala shodegan',
          icon = "fas fa-user-md", 
          color = confirmed_color)
 ```
@@ -634,7 +677,8 @@ valueBox(value = paste(format(sum(df_iran$active), big.mark = ",")
                        ,round(100 * sum(df_iran$active) / sum(df_iran$confirmed), 1)
                        ,"%)"
                        ,sep = ""), 
-         caption = "Active Cases", icon = "fas fa-ambulance", 
+         caption = 'Mobtalayan tayin taklif nashode',
+         icon = "fas fa-ambulance", 
          color = active_color)
 ```
 
@@ -646,7 +690,7 @@ valueBox(value = paste(format(sum(df_iran$recovered), big.mark = ",")
                        ,round(100 * sum(df_iran$recovered) / sum(df_iran$confirmed), 1) 
                        ,"%)"
                        ,sep = ""), 
-         caption = "Recovered Cases", icon = "fas fa-heartbeat", 
+         caption = "Behbud yaftegan", icon = "fas fa-heartbeat", 
          color = recovered_color)
 ```
 
@@ -659,7 +703,7 @@ valueBox(value = paste(format(sum(df_iran$death), big.mark = ",")
                        ,round(100 * sum(df_iran$death) / sum(df_iran$confirmed), 1)
                        ,"%)"
                        ,sep = ""),
-         caption = "Death Cases", 
+         caption = "Fot shodegan", 
          icon = "fas fa-heart-broken", 
          color = death_color)
 ```
@@ -793,7 +837,7 @@ df1 %>%
  Row
 -----------------------------------------------------------------------
 
-### 123
+### Age and Gender Distribution - Confirmed Cases
 
 ```{r}
 
@@ -801,7 +845,7 @@ df1 %>%
 ```
 
 
-### 123
+### Gender - Confirmed Cases
 ```{r}
 
 ```
