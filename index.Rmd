@@ -314,6 +314,13 @@ Trend
 
 
 plot_ly(data = df_daily) %>%
+    add_trace(x = ~ date,
+            y = ~ confirmed_cum,
+            type = "scatter",
+            mode = 'lines+markers',
+            name = "Confirmed",
+            line = list(color = confirmed_color),
+            marker = list(color = confirmed_color)) %>%
   add_trace(x = ~ date,
             y = ~ active_cum,
             type = "scatter",
@@ -360,7 +367,7 @@ plot_ly(data = df_daily) %>%
 
 
 
-### Daily New Cases - China vs. Rest of the World
+### Daily New Confirmed Cases - China vs. Rest of the World
 
 ```{r}
 daily_confirmed <- coronavirus %>%
@@ -453,10 +460,33 @@ df %>%
 ```   
 
 
-### 111
+### Number of Countries with at Least 1 Active Case at the Time
   
 ```{r}
 
+df1 %>%
+  ungroup() %>%
+  select(date, country, active) %>%
+  arrange(country, date) %>%
+  mutate(activ_cum=ave(active, country, FUN=cumsum)) %>%
+  filter(activ_cum>0) %>%
+  select(date, country) %>%
+  mutate(duplicate = duplicated(.)) %>%
+  filter(duplicate==F) %>%
+  group_by(date) %>%
+  summarise(No.Countries =  n()) %>%
+  arrange(date) %>%
+  
+  
+  plot_ly(x = ~ date, 
+          y = ~ No.Countries, 
+          type = "scatter", 
+          mode = "lines+markers",
+          name = "No.Countries") %>% 
+  layout(yaxis = list(title = 'Number of Countires'),
+         hovermode = "compare")
+
+  
 
 ``` 
 
@@ -680,11 +710,11 @@ df1 %>%
 
 
 
-### Population {data-width=2}
+### Population (www.worldometers.info) {data-width=2}
 ```{r}
 
 as.data.frame(cbind(c('China','Iran','Italy','South Korea'),
-                    c('1300','80','60','50'))) %>%
+                    c('1439','84','60','51'))) %>%
   DT::datatable(class='compact',
             colnames = c('Country', 'Population in Millions'),
             options = list(sDom = '<"top"><"bottom">'))
