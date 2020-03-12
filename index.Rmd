@@ -20,6 +20,7 @@ library(dplyr)
 library(tidyr)
 library(plotly)
 library(DT)
+library(wordcloud)
 
 
 #------------------ Parameters ------------------
@@ -660,9 +661,14 @@ max_date %>%
 
 
 
-Map
+Countries
 =======================================================================
 
+Row {.tabset .tabset-fade}
+-------------------------------------
+
+### Map
+ 
 <center>Coronavirus Confirmed Cases Worldwide</center>
 
 ```{r}
@@ -698,9 +704,34 @@ df %>%
 ```
 
 
+### Text
+
+<center>Total Confirmed Cases - Excluding China</center>
+
+```{r}
+
+df_wordcloud = df[df$country!='China',]
+#iranrank = which(df_wordcloud$country=='Iran')
+#totalno  = nrow(df_wordcloud)
+#mycolors = c(rep('black', iranrank - 1),'red',rep('black', totalno - iranrank))
+
+
+set.seed(1234) # for reproducibility 
+wordcloud(words = df_wordcloud$country, 
+          freq = df_wordcloud$confirmed, 
+          #min.freq = 1, 
+          #max.words=200, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          #colors = mycolors,
+          #ordered.colors=T,
+          colors=brewer.pal(8,"Dark2"))
+
+```
+
+
 IRAN
 =======================================================================
-
 
 
 Row
@@ -758,7 +789,7 @@ valueBox(value = paste(format(sum(df_iran$death), big.mark = ",")
 
 
 
- Row
+Row {data-height=600}
 -----------------------------------------------------------------------
 
 
@@ -808,11 +839,12 @@ df1 %>%
 
 ### Population (www.worldometers.info) {data-width=2}
 ```{r}
-
-as.data.frame(cbind(c('China','Iran','Italy','South Korea'),
-                    c('1439','84','60','51'))) %>%
+  
+data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain','Germany','US'),
+           'Population in Millions' = c('1439','84','60','51','65','47','84','331')
+           ) %>%
   DT::datatable(class='compact',
-            colnames = c('Country', 'Population in Millions'),
+            #colnames = c('Country', 'Population in Millions'),
             options = list(sDom = '<"top"><"bottom">'))
 
 
@@ -880,9 +912,7 @@ df1 %>%
 ```
 
 
-
-
- Row
+Row {data-height=300}
 -----------------------------------------------------------------------
 
 ### Age and Gender Distribution - Confirmed Cases
@@ -897,6 +927,8 @@ As soon as I access respective data!
 As soon as I access respective data!
 
 
+
+
 Data
 =======================================================================
 
@@ -905,11 +937,12 @@ df1 %>%
   ungroup() %>%
   select(date, country, Province.State, confirmed, recovered, death) %>%
   DT::datatable(rownames = FALSE,
-                options = list(searchHighlight = TRUE, pageLength = 20), 
-                filter = 'top')
+                options  = list(searchHighlight = TRUE, pageLength = 20), 
+                colnames = c('Date', 'Country', 'Province.State', 'Confirmed', 'Recovered', 'Death'),
+                filter   = 'top')
 ```
-
-
+            
+            
 
 About
 =======================================================================
