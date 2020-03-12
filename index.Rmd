@@ -1,5 +1,5 @@
 ---
-title: "covid19"
+title: "Coronavirus"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -100,7 +100,7 @@ trend_iran <- coronavirus %>%
   pivot_wider(names_from = type, values_from = total, values_fill = list(total=0)) %>%
   arrange(date) %>%
   ungroup() %>%
-  mutate(active =  confirmed - recovered - death) %>%
+  mutate(active = confirmed - recovered - death) %>%
   mutate(confirmed_cum = cumsum(confirmed),
          death_cum = cumsum(death),
          recovered_cum = cumsum(recovered),
@@ -127,6 +127,11 @@ min_date <- coronavirus %>%
   arrange(min_date)
 
 
+
+cal = seq(from = min(coronavirus$date),
+          by = "day",
+          length.out = as.numeric(max(coronavirus$date) -min(coronavirus$date))+1)
+cal = data.frame(date=cal)
 
 ```
 
@@ -257,28 +262,57 @@ df %>%
 ```
 
 
+#Recovery and Death Rates by Country {data-width=3}
+#df_summary <-coronavirus %>% 
+#  # dplyr::filter(Country.Region != "Others") %>%
+#  dplyr::group_by(Country.Region, type) %>%
+#  dplyr::summarise(total_cases = sum(cases)) %>%
+#  tidyr::pivot_wider(names_from = type, values_from = total_cases) %>%
+#  dplyr::arrange(- confirmed) %>%
+#  dplyr::filter(confirmed >= 25) %>%
+#  dplyr::select(country = Country.Region, confirmed, recovered, death) %>%
+#  dplyr::mutate(recover_rate = recovered / confirmed,
+#                death_rate = death / confirmed)  
+#df_summary %>%
+#  DT::datatable(rownames = FALSE,
+#                colnames = c("Country", "Confirmed", "Recovered", "Death", "Recovery #Rate", "Death Rate"),
+#                options = list(pageLength = nrow(df_summary), dom = 'tip')) %>%
+#  DT::formatPercentage("recover_rate", 2) %>%
+#  DT::formatPercentage("death_rate", 2)
 
 
-### Recovery and Death Rates by Country {data-width=3}
 
+
+### Recovery and Death Rates for Countries with at Least 25 Cases {data-width=3}
+  
 ```{r}
-df_summary <-coronavirus %>% 
-  # dplyr::filter(Country.Region != "Others") %>%
-  dplyr::group_by(Country.Region, type) %>%
-  dplyr::summarise(total_cases = sum(cases)) %>%
-  tidyr::pivot_wider(names_from = type, values_from = total_cases) %>%
-  dplyr::arrange(- confirmed) %>%
-  dplyr::filter(confirmed >= 25) %>%
-  dplyr::select(country = Country.Region, confirmed, recovered, death) %>%
-  dplyr::mutate(recover_rate = recovered / confirmed,
-                death_rate = death / confirmed)  
-df_summary %>%
-  DT::datatable(rownames = FALSE,
-                colnames = c("Country", "Confirmed", "Recovered", "Death", "Recovery Rate", "Death Rate"),
-                options = list(pageLength = nrow(df_summary), dom = 'tip')) %>%
-  DT::formatPercentage("recover_rate", 2) %>%
-  DT::formatPercentage("death_rate", 2) 
-```
+  
+df %>%
+  filter(confirmed >= 25) %>%
+  
+  plot_ly(y = ~ round(100 * recover_rate, 1),
+          x = ~ round(100 * death_rate, 1),
+          size = ~ log(confirmed),
+          sizes = c(5, 70),
+          type = 'scatter', mode = 'markers',
+          color = ~ country,
+          marker = list(sizemode = 'diameter' , opacity = 0.5),
+          hoverinfo = 'text',
+          text = ~paste("", country, 
+                        " Confirmed Cases: ", confirmed,
+                        " Recovery Rate: ", paste(round(100 * recover_rate, 1), "%", sep = ""),
+                        " Death Rate: ",  paste(round(100 * death_rate, 1), "%", sep = ""))) %>%
+  layout(yaxis = list(title = "Recovery Rate", ticksuffix = "%"),
+         xaxis = list(title = "Death Rate", ticksuffix = "%", 
+                      dtick = 1, 
+                      tick0 = 0),
+         hovermode = "compare")
+
+```   
+
+
+
+
 
 
 ### Share of Death Cases till `r  max(coronavirus$date)` {data-width=1}
@@ -434,45 +468,16 @@ Row
 -----------------------------------------------------------------------
 
 
-### Recovery and Death Rates for Countries with at Least 25 Cases
-  
-```{r}
-  
-df %>%
-  filter(confirmed >= 25) %>%
-  
-  plot_ly(y = ~ round(100 * recover_rate, 1),
-          x = ~ round(100 * death_rate, 1),
-          size = ~ log(confirmed),
-          sizes = c(5, 70),
-          type = 'scatter', mode = 'markers',
-          color = ~ country,
-          marker = list(sizemode = 'diameter' , opacity = 0.5),
-          hoverinfo = 'text',
-          text = ~paste("", country, 
-                        " Confirmed Cases: ", confirmed,
-                        " Recovery Rate: ", paste(round(100 * recover_rate, 1), "%", sep = ""),
-                        " Death Rate: ",  paste(round(100 * death_rate, 1), "%", sep = ""))) %>%
-  layout(yaxis = list(title = "Recovery Rate", ticksuffix = "%"),
-         xaxis = list(title = "Death Rate", ticksuffix = "%", 
-                      dtick = 1, 
-                      tick0 = 0),
-         hovermode = "compare")
-
-```   
-
-
-### Number of Countries with Confirmed Cases
+### How many countries have encountered coronavirus?
   
 ```{r}
 
-cal = seq(from = min(coronavirus$date),
-          by = "day",
-          length.out = as.numeric(max(coronavirus$date) -min(coronavirus$date))+1)
 
-a = data.frame(date=cal, No.Countries=rep(NA,length(cal)))
+a=cal%>%
+  mutate(No.Countries=rep(NA,length(cal)))
 
-for (val in cal ) {
+
+for (val in cal$date ) {
   a[a$date==val,]$No.Countries = sum(min_date$min_date<=val)
   }
 
@@ -489,9 +494,52 @@ a %>%
          yaxis = list(title = 'Number of Countires'),
          hovermode = "compare")
 
-  
+
+
+
 
 ``` 
+
+
+
+
+### How many countries have at least one active case at the time?
+
+```{r}
+
+b = cal%>%
+  mutate(No.Countries=rep(NA,length(cal)))  
+ 
+df1 %>%
+  ungroup() %>%
+  select(date, country, active) %>%
+  arrange(country, date) %>%
+  group_by(country, date) %>%
+  summarise(active=sum(active)) %>%
+  mutate(activ_cum=ave(active, country, FUN=cumsum)) %>%
+  filter(activ_cum>0) %>%
+  select(date, country) %>%
+  group_by(date) %>%
+  summarise(No.Countries =  n()) %>%
+  arrange(date) %>%
+
+
+plot_ly(x = ~ date, 
+        y = ~ No.Countries, 
+        type = "scatter", 
+        mode = "lines+markers",
+        name = "No.Countries",
+        line = list(color = active_color),
+        marker = list(color = active_color)) %>% 
+layout(xaxis = list(title = ''),
+       yaxis = list(title = 'Number of Countires'),
+       hovermode = "compare")
+
+
+  
+  
+``` 
+
 
 
 Today
@@ -839,16 +887,14 @@ df1 %>%
 
 ### Age and Gender Distribution - Confirmed Cases
 
-```{r}
 
+As soon as I access respective data!
 
-```
 
 
 ### Gender - Confirmed Cases
-```{r}
 
-```
+As soon as I access respective data!
 
 
 Data
@@ -868,33 +914,30 @@ df1 %>%
 About
 =======================================================================
   
-  **The Coronavirus Dashboard**
-  
-  This Coronavirus dashboard provides an overview of the 2019 Novel Coronavirus COVID-19 (2019-nCoV) epidemic. This dashboard is built with R using the Rmakrdown framework and can easily reproduce by others. The code behind the dashboard available [here](https://github.com/RamiKrispin/coronavirus_dashboard)
+**The Coronavirus Dashboard**
 
+  This analysis dashboard provides some visualizations on coronavirus pandemic disease (COVID-19). It's developed via R with the help of Rmarkdown framework.
+
+  
+  
 **Data**
   
   The input data for this dashboard is the [coronavirus](https://github.com/RamiKrispin/coronavirus) R package (dev version). The data and dashboard is refreshed on a daily bases. The raw data pulled from the Johns Hopkins University Center for Systems Science and Engineering (JHU CCSE) Coronavirus [repository](https://github.com/RamiKrispin/coronavirus-csv)
 
 
 
-
-**Packages**
-  
-  * Dashboard interface - the [flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/) package. 
-* Visualization - the [plotly](https://plot.ly/r/) package
-* Data manipulation - [dplyr](https://dplyr.tidyverse.org/), and [tidyr](https://tidyr.tidyverse.org/)
-* Tables - the [DT](https://rstudio.github.io/DT/) package
-
-**Deployment and reproducibly**
+**Deployment and Reproducibly**
   
   The dashboard was deployed to Github docs. If you wish to deploy and/or modify the dashboard on your Github account, you can apply the following steps:
   
-  * Fork the dashboard [repository](https://github.com/RamiKrispin/coronavirus_dashboard), or
+* Fork the dashboard [repository](https://github.com/RamiKrispin/coronavirus_dashboard), or
 * Clone it and push it to your Github package
 * Here some general guidance about deployment of flexdashboard on Github page - [link](https://github.com/pbatey/flexdashboard-example)
 
-For any question or feedback, you can either open an [issue](https://github.com/RamiKrispin/coronavirus_dashboard/issues) or contact me on [Twitter](https://twitter.com/Rami_Krispin).
 
 
+**About Me**
 
+  My name is Hadi Jafari. I've always been passionate about analyzing data. Having this in mind, these days most of the countries in the world are fighting with coronavirus. This drew my attention and raised some questions regarding the fact and figures. I happened to see some great visualizations developed by dear [Rami Krispin](https://ramikrispin.github.io/). I still had other questions on my mind to be answered. So I decided to expand Rami Krispin's work.
+  Check this dashboard and let me know if you've got any question or feedback. You can contact me on [Linkedin](https://www.linkedin.com/in/hadi-jafari/).
+  I do hope conditions improve worldwide ASAP.
