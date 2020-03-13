@@ -530,7 +530,7 @@ Today
 Row
 -----------------------------------------------------------------------
 
-### Cases Status Update for `r  max(coronavirus$date)`
+### Cases Status Update on `r  max(coronavirus$date)`
   
 ```{r}
 
@@ -690,7 +690,7 @@ df %>%
 
 ```{r}
 
-df_wordcloud = df[df$country!='China',]
+df_wordcloud = df[df$country!=c('China','Others'),]
 #iranrank = which(df_wordcloud$country=='Iran')
 #totalno  = nrow(df_wordcloud)
 #mycolors = c(rep('black', iranrank - 1),'red',rep('black', totalno - iranrank))
