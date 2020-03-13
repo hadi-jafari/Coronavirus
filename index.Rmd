@@ -38,6 +38,11 @@ death_color <- "red"
 download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
 load("cv")
 
+
+download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/covid_iran.rda", destfile="cviran")
+load("cviran")
+
+
 coronavirus <- coronavirus %>% 
   ungroup() %>%
   mutate(country = if_else(Country.Region=="United Arab Emirates","UAE",Country.Region)) %>%
@@ -133,6 +138,8 @@ cal = seq(from = min(coronavirus$date),
           by = "day",
           length.out = as.numeric(max(coronavirus$date) -min(coronavirus$date))+1)
 cal = data.frame(date=cal)
+  
+
 
 ```
 
@@ -231,8 +238,6 @@ layout(barmode = 'stack',
                    b = 10,
                    t = 10,
                    pad = 2))
-
-
 
 
 
@@ -710,6 +715,52 @@ wordcloud(words = df_wordcloud$country,
 ```
 
 
+
+### Iran
+
+<center>Coronavirus Confirmed Cases in Iran</center>
+
+
+Under Construction!
+```{r}
+
+# light grey boundaries
+l <- list(color = toRGB("grey"), width = 0.1)
+
+# specify map projection/options
+g <- list(
+  showframe = FALSE,
+  showcoastlines = FALSE,
+  projection = list(type = 'Mercator')
+)
+
+
+covid_iran %>%
+  ungroup() %>%
+  group_by(province) %>%
+  summarise(confirmed = sum(cases)) %>%
+
+  plot_geo(z = ~ confirmed, 
+           color = ~ confirmed, 
+           colors = 'Purples',
+           text = ~ paste(province, ' >> ', confirmed), 
+           hoverinfo = 'text',
+           locations = ~ province , 
+           locationmode = 'ISO-3',
+           marker = list(line = l)) %>%
+
+  colorbar(title = 'Confirmed Cases', tickprefix = '') %>%
+  hide_colorbar() %>% 
+  layout(geo = g)
+
+
+
+```
+
+
+
+
+
 Iran
 =======================================================================
 
@@ -769,7 +820,7 @@ valueBox(value = paste(format(sum(df_iran$death), big.mark = ",")
 
 
 
-Row {data-height=600}
+Row {data-height=1}
 -----------------------------------------------------------------------
 
 
@@ -890,21 +941,45 @@ df1 %>%
 ```
 
 
-Row {data-height=300}
+Row {data-height=1}
 -----------------------------------------------------------------------
 
-### Age and Gender Distribution - Confirmed Cases
+### Total Confirmed Cases in Iran by Province
+
+```{r}
+
+covid_iran %>%
+  ungroup() %>%
+  group_by(province) %>%
+  summarise(confirmed = sum(cases)) %>%
+  arrange(-confirmed) %>%
+  
+  
+  plot_ly(x = ~ province, 
+          y = ~ confirmed, 
+          text =  ~ confirmed, 
+          textposition = 'auto',
+          type = "bar", 
+          #name = "Active",
+          marker = list(color = confirmed_color)) %>%
+layout(barmode = 'stack',
+       yaxis = list(title = ""),
+       xaxis = list(title = "",
+                    categoryorder = "array", categoryarray = ~confirmed),
+       hovermode = "compare",
+       margin =  list(
+                   # l = 60,
+                   # r = 40,
+                   b = 10,
+                   t = 10,
+                   pad = 2))
 
 
-As soon as I access respective data!
 
 
 
-### Gender - Confirmed Cases
 
-As soon as I access respective data!
-
-
+```
 
 
 Data
