@@ -46,7 +46,7 @@ coronavirus <- coronavirus %>%
   mutate(country = if_else(country=="Iran (Islamic Republic of)", "Iran", country)) %>%
   mutate(country = if_else(country=="Republic of Korea", "South Korea", country)) %>%
   mutate(country = if_else(country=="Russian Federation", "Russia", country)) %>%
-  mutate(country = if_else(country=="a", "b", country)) %>%
+  mutate(country = if_else(country=="Korea, South", "South Korea", country)) %>%
   mutate(country = trimws(country)) %>%
   mutate(country = factor(country))
 
@@ -95,7 +95,7 @@ df_daily <- coronavirus %>%
   
 
 trend_iran <- coronavirus %>% 
-  filter(Country.Region == 'Iran (Islamic Republic of)') %>%
+  filter(Country.Region == 'Iran') %>%
   group_by(date, type) %>%
   summarise(total = sum(cases, na.rm = TRUE)) %>%
   pivot_wider(names_from = type, values_from = total, values_fill = list(total=0)) %>%
@@ -136,7 +136,7 @@ cal = data.frame(date=cal)
 
 ```
 
-WORLD {color=red}
+World {color=red}
 =======================================================================
 
 Row
@@ -261,26 +261,6 @@ df %>%
 
 
 ```
-
-
-#Recovery and Death Rates by Country {data-width=3}
-#df_summary <-coronavirus %>% 
-#  # dplyr::filter(Country.Region != "Others") %>%
-#  dplyr::group_by(Country.Region, type) %>%
-#  dplyr::summarise(total_cases = sum(cases)) %>%
-#  tidyr::pivot_wider(names_from = type, values_from = total_cases) %>%
-#  dplyr::arrange(- confirmed) %>%
-#  dplyr::filter(confirmed >= 25) %>%
-#  dplyr::select(country = Country.Region, confirmed, recovered, death) %>%
-#  dplyr::mutate(recover_rate = recovered / confirmed,
-#                death_rate = death / confirmed)  
-#df_summary %>%
-#  DT::datatable(rownames = FALSE,
-#                colnames = c("Country", "Confirmed", "Recovered", "Death", "Recovery #Rate", "Death Rate"),
-#                options = list(pageLength = nrow(df_summary), dom = 'tip')) %>%
-#  DT::formatPercentage("recover_rate", 2) %>%
-#  DT::formatPercentage("death_rate", 2)
-
 
 
 
@@ -409,7 +389,7 @@ plot_ly(data = df_daily) %>%
 ```{r}
 daily_confirmed <- coronavirus %>%
   filter(type == "confirmed") %>%
-  mutate(country = dplyr::if_else(Country.Region == "Mainland China", 
+  mutate(country = dplyr::if_else(Country.Region == "China", 
                                   "China", 
                                   "Rest of the World")) %>%
   group_by(date, country) %>%
@@ -730,7 +710,7 @@ wordcloud(words = df_wordcloud$country,
 ```
 
 
-IRAN
+Iran
 =======================================================================
 
 
@@ -742,7 +722,7 @@ Row
 ```{r}
 
 valueBox(value = paste(format(sum(df_iran$confirmed), big.mark = ","), "", sep = " "), 
-         caption = 'Mobtala shodegan',
+         caption = 'Total Confirmed Cases',
          icon = "fas fa-user-md", 
          color = confirmed_color)
 ```
@@ -756,7 +736,7 @@ valueBox(value = paste(format(sum(df_iran$active), big.mark = ",")
                        ,round(100 * sum(df_iran$active) / sum(df_iran$confirmed), 1)
                        ,"%)"
                        ,sep = ""), 
-         caption = 'Mobtalayan tayin taklif nashode',
+         caption = 'Active Cases',
          icon = "fas fa-ambulance", 
          color = active_color)
 ```
@@ -769,7 +749,7 @@ valueBox(value = paste(format(sum(df_iran$recovered), big.mark = ",")
                        ,round(100 * sum(df_iran$recovered) / sum(df_iran$confirmed), 1) 
                        ,"%)"
                        ,sep = ""), 
-         caption = "Behbud yaftegan", icon = "fas fa-heartbeat", 
+         caption = "Recovered Cases", icon = "fas fa-heartbeat", 
          color = recovered_color)
 ```
 
@@ -782,7 +762,7 @@ valueBox(value = paste(format(sum(df_iran$death), big.mark = ",")
                        ,round(100 * sum(df_iran$death) / sum(df_iran$confirmed), 1)
                        ,"%)"
                        ,sep = ""),
-         caption = "Fot shodegan", 
+         caption = "Death Cases", 
          icon = "fas fa-heart-broken", 
          color = death_color)
 ```
