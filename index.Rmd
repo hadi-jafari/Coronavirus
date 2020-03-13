@@ -35,8 +35,8 @@ death_color <- "red"
 
 
 #Since data of coronavirus package is not up to date:
-#download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
-#load("cv")
+download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
+load("cv")
 
 coronavirus <- coronavirus %>% 
   ungroup() %>%
@@ -841,51 +841,49 @@ data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain',
 #  arrange(-confirmed) %>%
 #  top_n(3, wt=confirmed) %>%
 #  select(country)
+df1 %>%
+  ungroup() %>%
+  #filter(country %in% unlist(top)) %>%
+  filter(country %in% c('Iran', 'Italy', 'South Korea')) %>%
+  select(country, date, confirmed) %>%
+  arrange(country, date) %>%
+  mutate(confirmed_cum = ave(confirmed, country, FUN=cumsum)) %>%
+  select(country, date, confirmed_cum) %>%
+  pivot_wider(names_from = country,
+              values_from = confirmed_cum,
+              values_fill=list(confirmed_cum=0)) %>%
+  arrange(date) %>%
 
-#df1 %>%
-#  ungroup() %>%
-#  #filter(country %in% unlist(top)) %>%
-#  filter(country %in% c('Iran', 'Italy', 'South Korea')) %>%
-#  select(country, date, confirmed) %>%
-#  arrange(country, date) %>%
-#  mutate(confirmed_cum = ave(confirmed, country, FUN=cumsum)) %>%
-#  select(country, date, confirmed_cum) %>%
-#  pivot_wider(names_from = country,
-#              values_from = confirmed_cum,
-#              values_fill=list(confirmed_cum=0)) %>%
-#  arrange(date) %>%
-#
-#
-#  plot_ly(x = ~ date,
-#          y = ~ Iran,
-#          type = "scatter",
-#          mode = "lines+markers",
-#          name = "Iran",
-#          line = list(color = 'green'),
-#          marker = list(color = 'green')) %>%
-#  
-#  add_trace(x = ~ date, 
-#            y = ~ Italy, 
-#            type = "scatter", 
-#            mode = "lines+markers",
-#            name = "Italy",
-#            line = list(color = 'blue'),
-#            marker = list(color = 'blue')) %>% 
-#  
-#  add_trace(x = ~ date, 
-#            y = ~ `South Korea`, 
-#            type = "scatter", 
-#            mode = "lines+markers",
-#            name = "South Korea",
-#            line = list(color = 'red'),
-#            marker = list(color = 'red')) %>% 
-#
-#  layout(title = "",
-#         yaxis = list(title = "Cumulative Confirmed Cases"),
-#         xaxis = list(title = ""),
-#         legend = list(x = 0.1, y = 0.9),
-#         hovermode = "compare")
 
+  plot_ly(x = ~ date,
+          y = ~ Iran,
+          type = "scatter",
+          mode = "lines+markers",
+          name = "Iran",
+          line = list(color = 'green'),
+          marker = list(color = 'green')) %>%
+  
+  add_trace(x = ~ date, 
+            y = ~ Italy, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "Italy",
+            line = list(color = 'blue'),
+            marker = list(color = 'blue')) %>% 
+  
+  add_trace(x = ~ date, 
+            y = ~ `South Korea`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "South Korea",
+            line = list(color = 'red'),
+            marker = list(color = 'red')) %>% 
+
+  layout(title = "",
+         yaxis = list(title = "Cumulative Confirmed Cases"),
+         xaxis = list(title = ""),
+         legend = list(x = 0.1, y = 0.9),
+         hovermode = "compare")
 
 
 
