@@ -15,7 +15,7 @@ rm(list=ls(all.names=TRUE))
 #------------------ Packages ------------------
 library(flexdashboard)
 library(coronavirus)
-data(coronavirus)
+data('coronavirus')
 library(dplyr)
 library(tidyr)
 library(plotly)
@@ -37,7 +37,6 @@ death_color <- "red"
 #Since data of coronavirus package is not up to date:
 download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
 load("cv")
-
 
 download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/covid_iran.rda", destfile="cviran")
 load("cviran")
