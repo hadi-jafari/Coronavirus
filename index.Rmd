@@ -37,14 +37,18 @@ death_color <- "red"
 #Since data of coronavirus package is not up to date:
 download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/coronavirus.rda", destfile="cv")
 load("cv")
+#coronavirus <- read.csv("https://raw.githubusercontent.com/RamiKrispin/coronavirus-csv/master/coronavirus_dataset.csv")
 
 download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/covid_iran.rda", destfile="cviran")
 load("cviran")
+#covid_iran <- read.csv('https://raw.githubusercontent.com/RamiKrispin/coronavirus-csv/master/iran/covid_iran_long.csv')
+
 
 
 coronavirus <- coronavirus %>% 
   ungroup() %>%
-  mutate(country = if_else(Country.Region=="United Arab Emirates","UAE",Country.Region)) %>%
+  mutate(country = if_else(Country.Region=="United Arab Emirates","UAE",
+                           as.character(Country.Region))) %>%
   mutate(country = if_else(country=="Mainland China", "China", country)) %>%
   mutate(country = if_else(country=="North Macedonia", "N.Macedonia", country)) %>%
   mutate(country = if_else(country=="Iran (Islamic Republic of)", "Iran", country)) %>%
