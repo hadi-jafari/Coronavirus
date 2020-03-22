@@ -21,6 +21,13 @@ library(tidyr)
 library(plotly)
 library(DT)
 library(wordcloud)
+library(sf)
+library(ggplot2)
+library(ggmap)
+library(scales)
+library(plotly)
+library(rgdal)
+library(broom)
 
 
 
@@ -54,6 +61,7 @@ coronavirus <- coronavirus %>%
   mutate(country = if_else(country=="Republic of Korea", "South Korea", country)) %>%
   mutate(country = if_else(country=="Russian Federation", "Russia", country)) %>%
   mutate(country = if_else(country=="Korea, South", "South Korea", country)) %>%
+  mutate(country = if_else(country=="Dominican Repolic", "Dominican", country)) %>%
   mutate(country = trimws(country)) %>%
   mutate(country = factor(country))
 
@@ -654,10 +662,12 @@ Countries
 Row {.tabset .tabset-fade}
 -------------------------------------
 
-### Map
- 
-<center>Coronavirus Confirmed Cases Worldwide</center>
 
+  
+### Map
+
+<center>Coronavirus Confirmed Cases Worldwide</center>
+  
 ```{r}
 
 # light grey boundaries
@@ -679,11 +689,11 @@ df %>%
            locations = ~ country , 
            locationmode = 'country names',
            marker = list(line = l)) %>%
-
+  
   #colorbar(title = 'Confirmed Cases', tickprefix = '') %>%
   hide_colorbar() %>% 
   layout(geo = g)
-         #title = '2014 Global GDP<br>Source:<a href="https://www.cia.gov/library/publications/the-world-factbook/fields/2195.html">CIA World Factbook</a>'
+#title = '2014 Global GDP<br>Source:<a href="https://www.cia.gov/library/publications/the-world-factbook/fields/2195.html">CIA World Factbook</a>'
 
 
 
@@ -694,7 +704,7 @@ df %>%
 ### Text
 
 <center>Total Confirmed Cases - Excluding China</center>
-
+  
 ```{r}
 
 df_wordcloud = df[df$country!=c('China','Others'),]
@@ -718,47 +728,29 @@ wordcloud(words = df_wordcloud$country,
 
 
 
+
+
 ### Iran
 
 <center>Coronavirus Confirmed Cases in Iran</center>
-
+  
 ```{r}
 
-#Packages
-library(sf)
-library(dplyr)
-library(tidyr)
-library(ggplot2)
-library(ggmap)
-library(scales)
-library(plotly)
-
-#Download shapefile
- #download.file('http://biogeo.ucdavis.edu/data/diva/adm/IRN_adm.zip', destfile='shapefile/iran_province_shapefile.zip')
- #unzip('shapefile/iran_province_shapefile.zip', exdir='shapefile')
- #file.remove('shapefile/iran_province_shapefile.zip')
-
-
 #Read shapefile
-library(rgdal)
 sf <- readOGR(dsn='C:/Users/Hadi/Desktop/coronavirus/shapefile',
               layer="IRN_adm1",
               verbose=FALSE)
-library(broom)
+
 sf_tidy <- tidy(sf)
 province <- data.frame(Province=sf@data$NAME_1, id=seq(0,nrow(sf@data)-1))
 sf_tidy_new <-  merge(sf_tidy, province, by="id")  
 
 
-
 #Business geographical data
-  #download.file("https://github.com/RamiKrispin/coronavirus/raw/master/data/covid_iran.rda", destfile="cviran")
-  #load("cviran")
 iran_province_cases <- covid_iran %>%
   ungroup() %>%
   group_by(province) %>%
   summarise(Total_cases=sum(cases))
-
 
 
 #Merging shapefile data with business data
@@ -766,8 +758,8 @@ merged_data <- merge(sf_tidy_new, iran_province_cases, by.x='Province', by.y='pr
 
 
 #Plot 
-map=
-ggplot(data = merged_data) +
+p <-
+  ggplot(data = merged_data) +
   geom_polygon(aes(x=long, y=lat, group=group, fill=Total_cases, text=paste(Province, ' >> ', Total_cases)),
                color = 'gray',
                size = 0.1) +
@@ -777,13 +769,11 @@ ggplot(data = merged_data) +
   guides(fill=guide_colorbar(title="No. Confirmed Cases")) +
   theme_nothing(legend = TRUE) + 
   labs(title = "") 
-ggplotly(map, tooltip=c("x", "y", "text"))
-
-
+p
+#ggplotly(p, tooltip=c("x", "y", "text"))
 
 
 ```
-
 
 
 
@@ -911,7 +901,7 @@ data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain',
 
 
 
-### Cumulative Confirmed Cases - Top Countries Excluding China {data-width=4}
+### Cumulative Confirmed Cases - Top Countries {data-width=4}
 ```{r}
 
 #top <- df %>%
