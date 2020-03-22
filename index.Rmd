@@ -911,7 +911,7 @@ data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain',
 
 
 
-### Cumulative Confirmed Cases - Top 3 Countries Excluding China {data-width=4}
+### Cumulative Confirmed Cases - Top Countries Excluding China {data-width=4}
 ```{r}
 
 #top <- df %>%
@@ -919,11 +919,17 @@ data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain',
 #  arrange(-confirmed) %>%
 #  top_n(3, wt=confirmed) %>%
 #  select(country)
+
+colors = brewer.pal(8, "Dark2")
+
+
 df1 %>%
   ungroup() %>%
+  group_by(country, date) %>%
+  summarise(confirmed=sum(confirmed)) %>%
   #filter(country %in% unlist(top)) %>%
-  filter(country %in% c('Iran', 'Italy', 'South Korea')) %>%
-  select(country, date, confirmed) %>%
+  filter(country %in% c('Iran', 'Italy', 'South Korea', 'China',
+                        'US', 'Spain', 'Germany', 'France')) %>%
   arrange(country, date) %>%
   mutate(confirmed_cum = ave(confirmed, country, FUN=cumsum)) %>%
   select(country, date, confirmed_cum) %>%
@@ -938,25 +944,65 @@ df1 %>%
           type = "scatter",
           mode = "lines+markers",
           name = "Iran",
-          line = list(color = 'green'),
-          marker = list(color = 'green')) %>%
+          line = list(color = colors[1]),
+          marker = list(color = colors[1])) %>%
   
   add_trace(x = ~ date, 
             y = ~ Italy, 
             type = "scatter", 
             mode = "lines+markers",
             name = "Italy",
-            line = list(color = 'blue'),
-            marker = list(color = 'blue')) %>% 
+            line = list(color = colors[2]),
+            marker = list(color = colors[2])) %>% 
   
   add_trace(x = ~ date, 
             y = ~ `South Korea`, 
             type = "scatter", 
             mode = "lines+markers",
             name = "South Korea",
-            line = list(color = 'red'),
-            marker = list(color = 'red')) %>% 
-
+            line = list(color = colors[3]),
+            marker = list(color = colors[3])) %>% 
+  
+  add_trace(x = ~ date, 
+            y = ~ `China`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "China",
+            line = list(color = colors[4]),
+            marker = list(color = colors[4])) %>% 
+  
+    add_trace(x = ~ date, 
+            y = ~ `US`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "US",
+            line = list(color = colors[5]),
+            marker = list(color = colors[5])) %>% 
+  
+    add_trace(x = ~ date, 
+            y = ~ `Spain`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "Spain",
+            line = list(color = colors[6]),
+            marker = list(color = colors[6])) %>% 
+  
+    add_trace(x = ~ date, 
+            y = ~ `Germany`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "Germany",
+            line = list(color = colors[7]),
+            marker = list(color = colors[7])) %>% 
+  
+     add_trace(x = ~ date, 
+            y = ~ `France`, 
+            type = "scatter", 
+            mode = "lines+markers",
+            name = "France",
+            line = list(color = colors[8]),
+            marker = list(color = colors[8])) %>% 
+  
   layout(title = "",
          yaxis = list(title = "Cumulative Confirmed Cases"),
          xaxis = list(title = ""),
@@ -1055,25 +1101,3 @@ About
   Check this dashboard and let me know if you've got any question or feedback. You can contact me on [Linkedin](https://www.linkedin.com/in/hadi-jafari/).
   I do hope conditions improve worldwide ASAP.
 
-
-
-IranMap
-=======================================================================
-
-### Iran Map
-
-```{r}  
-
-#download.file('http://biogeo.ucdavis.edu/data/diva/adm/IRN_adm.zip', destfile='shapefile/iran_province_shapefile.zip')
-#unzip('shapefile/iran_province_shapefile.zip', exdir='shapefile')
-#file.remove('shapefile/iran_province_shapefile.zip')
-library(sf)
-sf <- st_read("shapefile/IRN_adm1.shp")
-library(ggplot2)
-ggplot() + 
-  geom_sf(data = sf, size = 0.02, color = "black", fill = "pink") + 
-  ggtitle("Hadi Test") + 
-  coord_sf()
-
-
-```
