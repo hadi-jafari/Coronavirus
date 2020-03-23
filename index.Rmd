@@ -148,7 +148,10 @@ cal = seq(from = min(coronavirus$date),
           by = "day",
           length.out = as.numeric(max(coronavirus$date) -min(coronavirus$date))+1)
 cal = data.frame(date=cal)
+
+
   
+pop <- read.csv('C:/Users/Hadi/Desktop/coronavirus/Population/pop.csv')
 
 
 ```
@@ -331,6 +334,38 @@ df %>%
 
 ```
 
+
+Population
+=======================================================================
+
+
+
+
+
+```{r}
+
+df_pop = merge(df, pop, by='country') %>% #left join didn't work! (all.x = all)
+  ungroup() %>%
+  mutate('confirmed per million population'=round( confirmed/population*1000000,digits=0)) %>%
+  mutate(population=format(population,big.mark=',')) %>%
+  select(country,population , confirmed, 'confirmed per million population', recovered, death, active) %>%
+  arrange(desc(confirmed))
+
+df_pop %>%
+  DT::datatable(rownames = FALSE,
+                options  = list(searchHighlight = TRUE, pageLength = 20), 
+                colnames = c('Country', 'Population', 'Confirmed', 'Confirmed per Million Population', 'Recovered', 'Death', 'Active'),
+                filter   = 'top') %>%
+  
+  formatStyle('confirmed per million population',
+              background = styleColorBar(range(df_pop$`confirmed per million population`), 'lightblue'),
+              backgroundSize = '98% 88%',
+              backgroundRepeat = 'no-repeat',
+              backgroundPosition = 'center')
+  
+```
+            
+ 
 
 
 Trend
@@ -841,7 +876,7 @@ Row {data-height=1}
 -----------------------------------------------------------------------
 
 
-### Daily Cumulative Cases in Iran {data-width=4}
+### Daily Cumulative Cases in Iran {data-width=1}
   
 ```{r}
 
@@ -884,24 +919,18 @@ df1 %>%
 
 
 
-
-### Population (www.worldometers.info) {data-width=2}
-```{r}
   
-data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain','Germany','US'),
-           'Population in Millions' = c('1439','84','60','51','65','47','84','331')
-           ) %>%
-  DT::datatable(class='compact',
-            #colnames = c('Country', 'Population in Millions'),
-            options = list(sDom = '<"top"><"bottom">'))
+#data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain','Germany','US'),
+#           'Population in Millions' = c('1439','84','60','51','65','47','84','331')
+#           ) %>%
+#  DT::datatable(class='compact',
+#            #colnames = c('Country', 'Population in Millions'),
+#            options = list(sDom = '<"top"><"bottom">'))
+#
 
 
 
-```
-
-
-
-### Cumulative Confirmed Cases - Top Countries {data-width=4}
+### Cumulative Confirmed Cases - Top Countries {data-width=1}
 ```{r}
 
 #top <- df %>%
@@ -1044,21 +1073,6 @@ layout(barmode = 'stack',
 
 ```
 
-
-Data
-=======================================================================
-
-```{r}
-df1 %>% 
-  ungroup() %>%
-  select(date, country, Province.State, confirmed, recovered, death) %>%
-  DT::datatable(rownames = FALSE,
-                options  = list(searchHighlight = TRUE, pageLength = 20), 
-                colnames = c('Date', 'Country', 'Province.State', 'Confirmed', 'Recovered', 'Death'),
-                filter   = 'top')
-```
-            
-            
 
 About
 =======================================================================
