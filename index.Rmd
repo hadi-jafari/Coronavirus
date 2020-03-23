@@ -738,15 +738,17 @@ df %>%
 
 ### Text
 
-<center>Total Confirmed Cases - Excluding China</center>
+<center>Total Confirmed Cases</center>
   
 ```{r}
 
-df_wordcloud = df[df$country!=c('China','Others'),]
+df_wordcloud = df#[df$country!=c('China','Others'),]
 #iranrank = which(df_wordcloud$country=='Iran')
 #totalno  = nrow(df_wordcloud)
 #mycolors = c(rep('black', iranrank - 1),'red',rep('black', totalno - iranrank))
 
+colfunc  = colorRampPalette(c('#c9c9c9', confirmed_color))
+mycolors = colfunc(10)
 
 set.seed(1234) # for reproducibility 
 wordcloud(words = df_wordcloud$country, 
@@ -755,9 +757,10 @@ wordcloud(words = df_wordcloud$country,
           #max.words=200, 
           random.order=FALSE, 
           rot.per=0.35,
-          #colors = mycolors,
+          #colors=brewer.pal(8,"Dark2"),
           #ordered.colors=T,
-          colors=brewer.pal(8,"Dark2"))
+          colors = mycolors)
+          
 
 ```
 
@@ -799,7 +802,7 @@ p <-
                color = 'gray',
                size = 0.1) +
   coord_fixed(1.3) +
-  scale_fill_gradient(high = "purple", low = "white", guide = "colorbar", breaks=pretty_breaks(n=5)) +
+  scale_fill_gradient(high = confirmed_color, low = "white", guide = "colorbar", breaks=pretty_breaks(n=5)) +
   #scale_fill_distiller(name="", palette = 12, direction=1, breaks=pretty_breaks(n=5)) +
   guides(fill=guide_colorbar(title="No. Confirmed Cases")) +
   theme_nothing(legend = TRUE) + 
