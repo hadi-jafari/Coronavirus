@@ -335,6 +335,121 @@ df %>%
 ```
 
 
+
+
+GrowthFactor
+=======================================================================
+
+Row
+-----------------------------------------------------------------------
+
+### Daily New Cases {data-width=3}
+  
+```{r}
+
+smoother <- supsmu(df_daily$date, df_daily$confirmed, span = 0.5)
+
+plot_ly(data = df_daily) %>%
+    add_trace(x = ~ date,
+            y = ~ confirmed,
+            type = "scatter",
+            mode = 'lines+markers',
+            name = "Confirmed",
+            line = list(color = confirmed_color),
+            marker = list(color = confirmed_color)) %>%
+  add_trace(x = ~ date,
+            y = ~ smoother$y,
+            type = "scatter",
+            mode = 'lines',
+            name = "Running Line Smoother",
+            line = list(color = 'green')) %>%
+  layout(title = "",
+         yaxis = list(title = ""),
+         xaxis = list(title = ""),
+         legend = list(x = 0.1, y = 0.9),
+         hovermode = "compare")
+
+```
+
+
+
+### {data-width=1}
+
+```
+Epidemic Wave?
+
+An epidemic wave is a graph which traces the development of an epidemic over time and/or space.
+During an epidemic the number of new cases (infected individuals) increases rapidly to a peak and then falls more gradually until the epidemic is over.
+
+Reference: pcwww.liv.ac.uk/epidemics
+
+```
+
+```{r}
+#![](C:/Users/Hadi/Desktop/coronavirus/Files/epidemic_wave.jpg)
+```
+
+
+
+
+Row
+-----------------------------------------------------------------------
+
+
+### {data-width=1}
+
+```
+Growth Factor?
+
+Growth factor is the factor by which a quantity multiplies itself over time. The formula used is every day's new cases / new cases on the previous day. For example, a quantity growing by 7% every period (in this case daily) has a growth factor of 1.07.
+
+A growth factor above 1 indicates an increase, whereas one which remains between 0 and 1 it is a sign of decline, with the quantity eventually becoming zero, whereas a growth factor constantly above 1 could signal exponential growth
+
+Reference: www.worldometers.info
+
+```
+
+
+
+### Daily Growth Factor {data-width=2}
+  
+```{r}
+
+gr <- df_daily %>%
+  ungroup() %>%
+  select(date, confirmed) %>%
+  mutate('date+1' = date+1)
+
+gr <- merge(x=gr, y=gr, by.x='date', by.y='date+1') %>%
+  select('date','confirmed.x','date.y', "confirmed.y") %>%
+  mutate('growthfactor'=round(confirmed.x/confirmed.y, digits=2))
+  
+  
+  plot_ly(data = gr) %>%
+    add_trace(x = ~ date,
+              y = ~ growthfactor,
+              type = "scatter",
+              mode = 'lines+markers',
+              name = "Growth Factor",
+              line = list(color = 'gray'),
+              marker = list(color = 'gray')) %>%
+    add_trace(x = ~ date,
+              y = ~ 1,
+              type = "scatter",
+              mode = 'lines',
+              name = "y = 1",
+              line = list(color = 'red')) %>%
+    layout(title = "",
+           yaxis = list(title = ""),
+           xaxis = list(title = ""),
+           legend = list(x = 0.1, y = 0.9),
+           hovermode = "compare")
+  
+
+```
+
+
+
 Population
 =======================================================================
 
