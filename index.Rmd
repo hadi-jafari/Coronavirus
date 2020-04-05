@@ -345,7 +345,7 @@ Row
 
 
 
-### {data-width=1}
+### {data-width=1.1}
 
 ```
 Epidemic Wave
@@ -398,7 +398,7 @@ Row
 -----------------------------------------------------------------------
 
 
-### {data-width=1}
+### {data-width=1.1}
 
 ```
 Growth Factor
@@ -1030,23 +1030,13 @@ df1 %>%
             line = list(color = death_color),
             marker = list(color = death_color)) %>%
   layout(title = "",
-         yaxis = list(title = "Cumulative No. of Cases"),
+         yaxis = list(title = ""),
          xaxis = list(title = ""),
          legend = list(x = 0.1, y = 0.9),
          hovermode = "compare")
 
 ```
 
-
-
-  
-#data.frame('Country' =  c('China','Iran','Italy','South Korea','France','Spain','Germany','US'),
-#           'Population in Millions' = c('1439','84','60','51','65','47','84','331')
-#           ) %>%
-#  DT::datatable(class='compact',
-#            #colnames = c('Country', 'Population in Millions'),
-#            options = list(sDom = '<"top"><"bottom">'))
-#
 
 
 
@@ -1143,7 +1133,7 @@ df1 %>%
             marker = list(color = colors[8])) %>% 
   
   layout(title = "",
-         yaxis = list(title = "Cumulative Confirmed Cases"),
+         yaxis = list(title = ""),
          xaxis = list(title = ""),
          legend = list(x = 0.1, y = 0.9),
          hovermode = "compare")
